@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#0A2A8C", colorScheme: "light", viewportFit: "cover" };
 
 /** Google tag (Google Analytics via Tag Manager container). Loaded once, in the <head> of every page. */
-const GOOGLE_TAG_ID = "GTM-538J5JP8";
+const GOOGLE_TAG_ID = "GTM-TK922W5Q";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
