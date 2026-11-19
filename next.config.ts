@@ -1,3 +1,4 @@
+// Deployed by Vercel from GitHub (leadmakerAgency/marketbeaconreport): every push to main goes to production.
 import type { NextConfig } from "next";
 
 const securityHeaders = [
