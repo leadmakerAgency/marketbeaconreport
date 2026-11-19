@@ -1,0 +1,25 @@
+// The standalone sample post at /briefings/sample. Illustrative only: no real companies or figures.
+export const SAMPLE_POST = {
+  title: "Rates, copper and the AI spending question",
+  label: "The Weekly Beacon",
+  desk: "weekly-beacon",
+  date: "Sunday 15 November 2026",
+  preview: "Five themes that moved markets this week, and what to watch next week.",
+  blocks: [
+    `<p>A week where bond markets did the talking. Rate expectations shifted twice, copper ignored weak demand signals, and the largest technology companies told investors they intend to keep spending. Here's what mattered and what comes next.</p>`,
+    `<div class="toc"><div class="toc-h">In this briefing</div><ol><li>Rate-cut timing moved again</li><li>Copper held its ground</li><li>AI spending keeps rising</li><li>Canadian banks set the tone in Toronto</li><li>German industry looks for a floor</li></ol></div>`,
+    `<h2>1. Rate-cut timing moved again</h2>`,
+    `<p><strong>What happened.</strong> A softer US jobs report pulled forward expectations for the next interest rate cut, then a firmer inflation reading pushed them back out by the end of the week.</p><p><strong>Why it matters.</strong> Rate expectations drive borrowing costs for companies and the valuations investors are willing to pay for future earnings. Small caps and pre-revenue companies feel it most.</p><p><strong>What to watch.</strong> Comments from central bank officials in the week ahead, and whether two-year bond yields hold their range.</p>`,
+    `<h2>2. Copper held its ground</h2>`,
+    `<p><strong>What happened.</strong> Supply disruptions in South America offset weaker demand signals from China, keeping copper near the top of its recent range.</p><p><strong>Why it matters.</strong> Producers and developers with near-term supply benefit from a tight market. Explorers depend on financing conditions, which follow prices with a lag.</p><p><strong>What to watch.</strong> Exchange inventory levels and any update on the disrupted mines.</p>`,
+    `<h2>3. AI spending keeps rising</h2>`,
+    `<p><strong>What happened.</strong> Several of the largest technology companies raised their capital spending plans for data centres again, while investors asked harder questions about when that spending pays back.</p><p><strong>Why it matters.</strong> The spending flows to chipmakers, power and cooling suppliers, and the copper and power grid supply chain.</p><p><strong>What to watch.</strong> Chipmaker earnings later this month and any sign of orders being delayed.</p>`,
+    `<h2>4. Canadian banks set the tone in Toronto</h2>`,
+    `<p><strong>What happened.</strong> Bank earnings season approached with investors focused on credit quality and dividend growth.</p><p><strong>Why it matters.</strong> Banks are the largest weight in the S&amp;P/TSX Composite, so their results move the whole index.</p><p><strong>What to watch.</strong> Provisions for bad loans and any dividend changes.</p>`,
+    `<h2>5. German industry looks for a floor</h2>`,
+    `<p><strong>What happened.</strong> Factory orders stabilised after a weak run, while carmakers continued to warn on margins.</p><p><strong>Why it matters.</strong> Industrial and auto stocks make up a large part of the DAX and are sensitive to China demand and energy costs.</p><p><strong>What to watch.</strong> The ZEW economic sentiment survey on Tuesday.</p>`,
+    `<h2>The week ahead</h2>`,
+    `<table class="data"><thead><tr><th>Day</th><th>Event</th><th>Market</th></tr></thead><tbody><tr><td>Tue</td><td>ZEW economic sentiment</td><td>Germany</td></tr><tr><td>Wed</td><td>Consumer prices</td><td>US</td></tr><tr><td>Thu</td><td>Bank earnings begin</td><td>Canada</td></tr><tr><td>Fri</td><td>Labour Force Survey</td><td>Canada</td></tr></tbody></table>`,
+    `<p class="sample-note">Sample post for illustration. Events and themes are examples, not a record of real market moves.</p>`,
+  ],
+};
