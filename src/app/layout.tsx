@@ -21,9 +21,21 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#0A2A8C", colorScheme: "light", viewportFit: "cover" };
 
+/** Google tag (Google Analytics via Tag Manager container). Loaded once, in the <head> of every page. */
+const GOOGLE_TAG_ID = "GTM-538J5JP8";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <script async src={`https://www.googletagmanager.com/gtm.js?id=${GOOGLE_TAG_ID}`} />
+        <script
+          id="google-tag"
+          dangerouslySetInnerHTML={{
+            __html: "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());",
+          }}
+        />
+      </head>
       <body>
         {children}
         <Analytics />
