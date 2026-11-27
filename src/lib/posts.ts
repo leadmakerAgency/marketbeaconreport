@@ -1,5 +1,15 @@
-// Launch posts. Static until the CMS is connected; each becomes a page at /briefings/<slug>
-// and appears in the archive, on desk pages and in the homepage card alongside sent briefings.
+import "server-only";
+import fs from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
+import { Marked, type Tokens } from "marked";
+import { imageSize } from "image-size";
+
+// Website posts, written in Sveltia CMS (/admin) and stored as Markdown in content/posts/.
+// Each becomes a page at /briefings/<slug> and appears in the archive, on desk pages and in the
+// homepage card alongside sent Brevo briefings.
+
+export type PostImage = { src: string; width: number; height: number; alt: string; caption: string; credit: string; creditUrl: string; license: string; licenseUrl: string };
 
 export type Post = {
   slug: string;
@@ -7,271 +17,109 @@ export type Post = {
   preview: string;
   tag: "weekly" | "stocks" | "mining" | "tech";
   date: string; // ISO date
+  draft: boolean;
   disclosure?: string;
+  image?: PostImage;
   blocks: string[];
   sources: { label: string; url: string }[];
 };
 
-export const POSTS: Post[] = [
-  {
-    slug: "copper-price-slump-ai-tariff-trades-unwind",
-    title: "Copper slides 14% in three weeks as the AI and tariff bets unwind",
-    preview: "The paper market is selling copper hard while the physical market in China is as tight as it has ever been. One of them is wrong.",
-    tag: "mining",
-    date: "2026-11-19T12:00:00Z",
-    blocks: [
-      `<p>Copper has just had its roughest stretch in months. On Wednesday the December Comex contract fell as much as 6% at one point, its steepest one-day drop in eight months, according to Investing.com and IndexBox. That leaves it about 14% lower in three weeks and roughly 17% below the record it set in September. In London, three-month copper touched US$12,640 a tonne, a seven-month low.</p>`,
-      `<p>Most of this year's gain is now gone. At the peak copper was up 22% for 2026. After this week, it is up about 1%.</p>`,
-      `<h2>Why it's falling</h2>`,
-      `<p>No single thing broke. Several props that had been holding the price up gave way at the same time.</p>`,
-      `<ul><li><strong>The AI trade is coming apart.</strong> Many investors bought copper as a way to play the data centre build-out, since every new facility needs a great deal of wiring and power equipment. As doubts about AI spending grew, those positions were sold. Nvidia beat its own revenue forecast this week and copper fell anyway.</li><li><strong>The tariff premium is fading.</strong> Traders spent much of the year shipping copper into the US ahead of a possible tariff on refined metal. TD Securities now says that tariff looks less likely. US warehouses hold about 85% of the 1.09 million tonnes in exchange-monitored stocks, and with prices higher in China, some of that metal may now head back out.</li><li><strong>A stronger US dollar.</strong> The dollar is near a 19-month high on expectations of more Federal Reserve rate rises, which makes copper dearer for buyers outside the US.</li><li><strong>The funds are heading for the door.</strong> Speculative net long positions on Comex have dropped from more than 80,000 contracts six weeks ago to about 35,000, according to Saxo Bank. Billionaire investor Stanley Druckenmiller said this week he is now short copper, meaning he is betting the price falls. Once key chart levels broke, computer-driven funds added to the selling.</li></ul>`,
-      `<h2>The miners took the hit</h2>`,
-      `<p>Eleven of the largest copper-exposed miners lost a combined US$141 billion in market value over the past month, about 16%, with almost half of that in the last week alone, according to figures reported by IndexBox. Southern Copper fell 22% over the month, Freeport-McMoRan 20% and Glencore 17%. Ivanhoe Mines was the worst of the group, down 30% for the month and 56% for the year.</p>`,
-      `<p>It reaches beyond share prices. Chile, Peru, the Democratic Republic of Congo and Zambia had all set budgets and currencies against a year of record copper prices.</p>`,
-      `<div class="callout"><strong>The number:</strong> US$141 billion. That is roughly how much value the big copper miners have lost in a month, on a move in the metal that has mostly been driven by fund positioning rather than mines or factories.</div>`,
-      `<h2>The strange part: physical copper is tight</h2>`,
-      `<p>If demand had genuinely collapsed, you would expect copper to be piling up. It isn't, at least not in China. The premium buyers pay to import copper into China hit a record US$360 a tonne this week, up from under US$100 in September. Stocks in Shanghai Futures Exchange warehouses fell 18% in a week to 27,642 tonnes, the lowest since December 2023.</p>`,
-      `<p>Supply is not getting easier either. Chile's copper agency Cochilco expects the country's 2026 output to fall 8.4% to 4.94 million tonnes, its weakest in 23 years. And treatment charges, the fee miners normally pay smelters to process their ore, hit a record minus US$247.20 a tonne earlier this month. A negative fee means smelters are paying miners for the privilege, which tells you how scarce raw material is.</p>`,
-      `<h2>Two ways to read it</h2>`,
-      `<p>At a copper industry conference in Asia this week, the mood was split. Nicholas Snowdon of trading house Mercuria said current consumption looks closer to a recession than to growth, and Natixis described the mix of US stockpiling and AI money as a bubble. Goldman Sachs took the other side, arguing that the slide is about positioning in AI-linked trades, not weaker fundamentals.</p>`,
-      `<p>Our read: the paper market and the physical market are telling two different stories, and they can't both be right for long. Either real demand catches down to the futures price, or tight physical supply drags the futures back up. Sentiment is in charge for now.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<ul><li><strong>Chart levels.</strong> Saxo's Ole Hansen sees the next support at US$5.63 a pound, where copper finished 2025, and then US$5.32.</li><li><strong>China's import premium.</strong> If it stays at records while futures fall, the physical market is winning the argument.</li><li><strong>The US tariff decision.</strong> A clear no would likely push more US-held metal back onto the world market.</li><li><strong>Cobre Panamá.</strong> Panama has started formal talks on restarting First Quantum's mine, which would add supply.</li></ul>`,
-      `<p>The risks run both ways. A deeper slowdown or a wider AI sell-off could push copper lower still, and a squeeze in the physical market could reverse the move just as quickly. For miners and the countries that depend on them, this is a reminder of how much of this year's price was borrowed from expectations.</p>`,
-    ],
-    sources: [
-      { label: "MINING.COM: Copper price craters as AI, tariff trades unwind (Nov 2026)", url: "https://www.mining.com/copper-price-craters-as-ai-tariff-trades-unwind-and-asia-copper-week-hears-of-recessionary-like-demand/" },
-      { label: "IndexBox: Copper plunges as AI trade unwinds, dollar strengthens (18 Nov 2026)", url: "https://www.indexbox.io/blog/coppers-steepest-one-day-drop-in-eight-months-as-ai-trade-unwinds/" },
-      { label: "Investing.com: Copper slides despite tight physical supply (18 Nov 2026)", url: "https://www.investing.com/news/commodities-news/copper-slides-despite-tight-physical-supply--what-is-driving-the-selloff-93CH-5036671" },
-      { label: "The Market Brain: Copper suffers sharpest sell-off in months as AI trade unravels (19 Nov 2026)", url: "https://themarketbrain.substack.com/p/copper-suffers-sharpest-sell-off" },
-    ],
-  },
-  {
-    slug: "us-antimony-explorer-what-it-has-and-what-it-must-prove",
-    title: "Washington wants American antimony. Here's why it matters",
-    preview: "China controls supply, the Pentagon is stockpiling, and the US has one smelter. Here's what the market is telling us, and where new supply could come from.",
-    tag: "mining",
-    date: "2026-11-13T12:00:00Z",
-    blocks: [
-      `<p>Antimony is one of those metals most investors never think about. Washington is thinking about it a lot, and that is starting to show up in the money, the rules and the companies trying to fill the gap.</p>`,
-      `<h2>Why antimony matters</h2>`,
-      `<p>Antimony goes into ammunition, flame retardants and batteries. China dominates global supply and has restricted exports, and the US has just one antimony smelter, run by United States Antimony in Montana. For a metal the military depends on, that is an uncomfortable position to be in.</p>`,
-      `<h2>Washington is putting money behind it</h2>`,
-      `<p>The Defense Logistics Agency recently committed US$2 billion to buy strategic materials for the national stockpile. From 1 January 2027, defence contractors are meant to stop sourcing certain critical materials from China and Russia, according to Fortune. And advisers who help companies win federal funding told MINING.COM they expect support to continue whoever controls Congress, because cutting reliance on China has backing from both parties.</p>`,
-      `<h2>What the market is telling us</h2>`,
-      `<p>United States Antimony, the sector's benchmark, is selling more metal than ever: 468,842 pounds last quarter, up 68%, with October its biggest month on record. Prices have been volatile, with its average selling price down about a third on a year ago, which shows how much this market still moves with China's export policy.</p>`,
-      `<div class="callout"><strong>The takeaway:</strong> demand from Washington is real, and new US supply is scarce. That gap is where the opportunity, and the risk, sits.</div>`,
-      `<h2>Where new supply could come from</h2>`,
-      `<p>That scarcity is why small explorers with American antimony projects are getting attention. One that caught our eye is Krait Critical Minerals (CSE: KRIT, FSE: U0S).</p>`,
-      `<ul><li><strong>A project that has already produced.</strong> In September Krait acquired Nevada Hills Antimony LLC, giving it contractual interests in the Bales and Antimony Bell projects in Washington State. Bales was mined in 1951 and 1952, the last time the US scrambled for domestic antimony.</li><li><strong>Picked out by the state at the time.</strong> A 1951 state survey of 37 antimony occurrences named Bales as one of only three with a real chance of commercial production.</li><li><strong>Encouraging grades.</strong> Historical samples reported around 10.9% to 14.4% antimony with low arsenic of about 0.2%, which can mean little processing before a smelter will accept the material.</li><li><strong>A tight share structure.</strong> About 16.1 million shares, no warrants and more than 70% closely held, according to Junior Mining Pro.</li><li><strong>Moving quickly.</strong> Fieldwork started six days after the deal closed, and chief executive Oscar Mendoza has said he has spoken with a potential buyer for future production.</li><li><strong>Professional money is watching.</strong> Singapore fund manager Ki-Un Park of Straits Invest has taken a position and said his fund would probably join Krait's next financing.</li></ul>`,
-      `<p>The Bales grades are historical and not yet confirmed by modern drilling under Canada's NI 43-101 rules, so the fieldwork now under way is the first real test. No government funding has been announced for Krait itself, and as with any early-stage explorer, results can move the share price sharply in either direction.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<p>Further stockpile purchases and how the 2027 sourcing rules are enforced, antimony prices as China adjusts its export policy, and the first results from Bales. If Krait's fieldwork lands well, it will have turned a strong story into hard evidence at exactly the moment Washington is looking for new American supply.</p>`,
-    ],
-    sources: [
-      { label: "Junior Mining Pro: JMP Antimony stock holds asset that 1951 'FORTRESS' program mined for emergency supply (1 Oct 2026)", url: "https://juniorminingpro.substack.com/p/jmp-antimony-stock-holds-asset-that" },
-      { label: "Streetwise Reports: Why this fund manager says the commodity cycle is just getting started (Oct 2026)", url: "https://www.streetwisereports.com/article/2026/10/08/why-this-fund-manager-says-the-commodity-cycle-is-just-getting-started.html" },
-      { label: "MINING.COM: US critical minerals funding to withstand congressional shift, advisers say (10 Nov 2026)", url: "https://www.mining.com/us-critical-minerals-funding-to-withstand-congressional-shift-advisers-say/" },
-      { label: "Fortune: Pentagon FORTRESS critical minerals stockpile (8 Nov 2026)", url: "https://fortune.com/2026/11/08/pentagon-fortress-critical-minerals-stockpile-tungsten-rare-earth/" },
-      { label: "United States Antimony: Q3 2026 results (12 Nov 2026)", url: "https://www.sec.gov/Archives/edgar/data/0000101538/000110465926126237/tm2629635d1_ex99-1.htm" },
-    ],
-  },
-  {
-    slug: "nvidia-jensen-huang-steps-down-ai-trade",
-    title: "Nvidia's Jensen Huang steps down, and the AI trade asks what comes next",
-    preview: "Nvidia is now run by its CFO on an interim basis. The bigger question is the web of financing Nvidia has built around its own customers.",
-    tag: "tech",
-    date: "2026-11-13T12:00:00Z",
-    blocks: [
-      `<p>Jensen Huang, the man most investors picture when they think about the AI boom, stepped down as Nvidia's chief executive on Thursday. The board met late on Wednesday after reports about his personal conduct, and chief financial officer Colette Kress is now interim CEO while the company looks for a permanent replacement.</p>`,
-      `<h2>How the market took it</h2>`,
-      `<p>Better than you might expect, at first. Nvidia shares opened lower, clawed some of it back, and were down nearly 5% by mid-afternoon in London, according to Reuters. The more telling moves were around it. CoreWeave, the cloud company Nvidia backs, fell more than 6%, as did South Korea's Naver. Rivals Broadcom and AMD rose, and China's own GPU makers jumped close to 10%.</p>`,
-      `<p>For context, Nvidia's share price has risen roughly ninefold since ChatGPT launched four years ago, and the company is worth about US$4 trillion.</p>`,
-      `<h2>Why this is about more than one person</h2>`,
-      `<p>Over the past year Nvidia has become something like a lender of last resort for the AI industry. Its latest report listed US$164.5 billion of financial commitments, including an obligation capped at US$105 billion linked to an OpenAI data centre in Ohio and more than US$50 billion of lease and capacity guarantees. In August it teamed up with Apollo, BlackRock, Blackstone and others on financing platforms aimed at more than US$500 billion of outside capital, with Nvidia saying it could backstop up to a quarter of the deals.</p>`,
-      `<p>That support helps smaller AI companies borrow. Several analysts quoted by Reuters made the same point in different ways: if lenders start to doubt Nvidia's leadership or its appetite for these guarantees, the cost of money for the rest of the AI build-out goes up. One called Nvidia the "Bank of AI". Others argued the opposite, that its chips still have no real substitute and demand will hold whoever is in charge.</p>`,
-      `<div class="callout"><strong>The number:</strong> US$164.5 billion. That is how much Nvidia has committed in financing, leases and guarantees, according to its latest report. It is why a change at the top matters to companies that never sell a single Nvidia share.</div>`,
-      `<h2>What we're watching</h2>`,
-      `<p>Nvidia reports earnings next week. The sales numbers will probably be fine. What we want to hear is whether the guidance set under Huang still stands, who is on the shortlist to replace him, and whether the board says anything about the financing commitments. We'd also watch CoreWeave and other heavily financed AI names, because that is where any change in Nvidia's support would show up first.</p>`,
-    ],
-    sources: [
-      { label: "BNN Bloomberg / Reuters: Investors worry the AI trade might lose Nvidia's largesse after Huang (12 Nov 2026)", url: "https://www.bnnbloomberg.ca/business/artificial-intelligence/2026/11/12/investors-worry-the-ai-trade-might-lose-nvidias-largesse-after-huang/" },
-      { label: "CNBC: Nvidia's leadership crisis tests the chipmaker's role as the 'central bank of AI' (11 Nov 2026)", url: "https://cnbc.com/2026/11/11/nvidia-jensen-huang-ai-financial-system-risk.html" },
-    ],
-  },
-  {
-    slug: "united-states-antimony-q3-2026-volumes-up-prices-down",
-    title: "United States Antimony sells more metal at lower prices and drops its revenue forecast",
-    preview: "Volumes rose 68% but the average price fell by a third. The company has swapped dollar guidance for pounds, and that tells you something.",
-    tag: "mining",
-    date: "2026-11-13T12:00:00Z",
-    blocks: [
-      `<p>United States Antimony (NYSE: UAMY), the only antimony smelter operator in the US, reported its third quarter on Thursday. The short version: it is selling a lot more antimony, it is getting a lot less for each pound, and it no longer wants to promise a revenue number.</p>`,
-      `<h2>The numbers</h2>`,
-      `<p>Revenue was US$10.1 million, up about 16% on a year earlier. The company sold 468,842 pounds of antimony, up 68%. But the average price fell 34% to US$18.83 a pound. The net loss widened to US$9.5 million from US$4.8 million, partly because of a US$3.8 million paper loss on its stake in Larvotto Resources.</p>`,
-      `<p>One bright spot: gross margin rose to 42% from 23%. The government business is doing the heavy lifting there. Sales to the Defense Logistics Agency for the national stockpile earned around US$31.50 a pound, against roughly US$12.16 for industrial customers.</p>`,
-      `<h2>The guidance change</h2>`,
-      `<p>UAMY withdrew its 2026 revenue forecast of US$60 to 75 million and now guides on volume instead: 1.68 to 1.81 million pounds of antimony this year, about 24% more than 2025 at the midpoint. Chief executive Gary Evans said every step of the stockpile process, from sampling to inspection and acceptance, took longer than expected, and that pounds better reflect what the company can control.</p>`,
-      `<p>We'd read that plainly. When a company stops guiding on dollars, it is usually because it can't predict the price. With antimony that is fair: the price has swung hard as China changes its export rules. But it does mean investors lose a yardstick.</p>`,
-      `<h2>Why it matters beyond one company</h2>`,
-      `<p>UAMY is the benchmark for the whole US antimony story. Its shares jumped 19% on Monday ahead of the results, according to 24/7 Wall St, riding Washington's push for domestic critical minerals. The same day, Reuters reported that China had extended its rare earth export-control waivers by two months. Every small antimony explorer in North America is valued, one way or another, against what UAMY shows is possible.</p>`,
-      `<div class="callout"><strong>The number:</strong> 310,000 pounds. That was UAMY's October sales volume, its highest month on record, according to the company. If that pace holds, the volume guidance looks reachable.</div>`,
-      `<h2>What we're watching</h2>`,
-      `<p>Whether stockpile deliveries keep their October pace, what antimony prices do as China's waivers run down, and how much cash the company burns while it waits. Evans said keeping liquidity high is "paramount", which is the right instinct and also a reminder that the business is not yet paying for itself.</p>`,
-    ],
-    sources: [
-      { label: "United States Antimony: Q3 2026 results, Form 8-K exhibit (12 Nov 2026)", url: "https://www.sec.gov/Archives/edgar/data/0000101538/000110465926126237/tm2629635d1_ex99-1.htm" },
-      { label: "24/7 Wall St: United States Antimony surges 19% ahead of earnings (9 Nov 2026)", url: "https://247wallst.com/investing/2026/11/09/united-states-antimony-surges-19-ahead-of-earnings-usa-rare-earth-climbs-7-critical-metals-rises-4/" },
-    ],
-  },
-  {
-    slug: "us-critical-minerals-funding-survives-congress-change",
-    title: "Why US critical minerals money should survive a change in Congress",
-    preview: "Advisers who help companies win federal funding say the money is already allocated. Expect more questions about who gets it, not less of it.",
-    tag: "mining",
-    date: "2026-11-11T12:00:00Z",
-    blocks: [
-      `<p>If you hold critical minerals stocks, the midterm result probably made you nervous. A Democratic-controlled Congress could, in theory, turn off the tap that has been funding US mines, refineries and stockpiles. The people who actually help companies win that money don't think it will.</p>`,
-      `<h2>What the advisers said</h2>`,
-      `<p>Steve Empedocles and VJ Sahi run Clark Street Associates, a Washington and Silicon Valley firm that says it has secured more than US$5.4 billion in government funding for its clients. Speaking to MINING.COM, their argument came down to three points.</p>`,
-      `<ul><li><strong>The money is already there.</strong> Funds from earlier budget legislation are still largely unspent, and the administration can keep doing deals with them without a new bill.</li><li><strong>National security cuts across party lines.</strong> Reducing reliance on Chinese supply has support on both sides, and the annual defence authorisation bill remains the main vehicle for minerals policy.</li><li><strong>Expect scrutiny, not cuts.</strong> Congress is likely to ask harder questions about how recipients were chosen and how deals were structured. Empedocles does not expect that to slow investment for at least a couple of years.</li></ul>`,
-      `<p>The money is still moving. The week before the interview, the Defense Logistics Agency committed US$2 billion to buy strategic materials for the national stockpile this fiscal year.</p>`,
-      `<h2>Why it matters for Canada</h2>`,
-      `<p>Despite the friction between Washington and Ottawa, both advisers see Canadian miners and US processors as natural partners. The weakest link, Sahi said, is refining and processing, and nobody has settled where that capacity should be built. There is precedent for cross-border support: in 2024 the Pentagon gave US$14.7 million in Defense Production Act awards to two Canadian companies, Fortune Minerals and Lomiko Metals.</p>`,
-      `<p>Add a deadline. From 1 January 2027, US defence contractors are meant to stop buying rare earths, magnets and tungsten from China, Russia, Iran and North Korea, according to Fortune. Waivers have been granted repeatedly because domestic supply is short, but the rule keeps up the pressure to build alternatives.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<p>The first oversight hearings in the new Congress, the next defence authorisation bill, and whether Canadian processing and recycling companies start winning US funding. One caution: political support for a sector is not the same as support for any one company. Funding decisions will get more scrutiny, and weak projects are more likely to be the ones that miss out.</p>`,
-    ],
-    sources: [
-      { label: "MINING.COM: US critical minerals funding to withstand congressional shift, advisers say (10 Nov 2026)", url: "https://www.mining.com/us-critical-minerals-funding-to-withstand-congressional-shift-advisers-say/" },
-      { label: "Fortune: Pentagon FORTRESS critical minerals stockpile (8 Nov 2026)", url: "https://fortune.com/2026/11/08/pentagon-fortress-critical-minerals-stockpile-tungsten-rare-earth/" },
-    ],
-  },
-  {
-    slug: "hot-us-inflation-december-rate-hike-tsx-falls",
-    title: "Hotter US inflation puts a December rate hike on the table",
-    preview: "October prices rose faster than expected, the TSX fell nearly 1%, and one Fed governor is now talking about a half-point move.",
-    tag: "stocks",
-    date: "2026-11-11T12:00:00Z",
-    blocks: [
-      `<p>The October inflation report was the one number markets were waiting for this week, and it came in warm. US consumer prices rose 0.4% in the month against forecasts of 0.3%. The core measure, which strips out food and energy, rose 0.3% against 0.2% expected.</p>`,
-      `<h2>Why the report was odd</h2>`,
-      `<p>There is no annual inflation rate this month. The Bureau of Labor Statistics didn't collect October 2025 prices during last year's government shutdown, so it has nothing to compare against. September's annual rate was 3.7%. Investors were left reading the monthly figures, and the monthly core figure has now been 0.3% three months running.</p>`,
-      `<h2>What it means for rates</h2>`,
-      `<p>Before the report, futures markets put better than 80% odds on a quarter-point rate rise at the Federal Reserve's 8 to 9 December meeting, according to CME FedWatch. Fed Governor Christopher Waller had said a core reading of around 0.3% or higher would justify considering a half-point move. He got it. The two-year Treasury yield, the bond most sensitive to Fed expectations, rose to 4.69% from 4.55%.</p>`,
-      `<h2>How markets took it</h2>`,
-      `<p>Toronto took it worst. The S&amp;P/TSX composite fell 275.81 points, about 0.8%, to 36,170.45, dragged by mining and materials stocks as gold dropped US$84.30 to US$4,030.20 an ounce and oil slipped to US$86.04 a barrel. The S&amp;P 500 lost 29.01 points to 7,520.93 and the Nasdaq fell 187.26 points. The Canadian dollar weakened to 70.52 US cents.</p>`,
-      `<p>The gold move makes sense once you see it. Higher US rates make a metal that pays no interest less attractive, and a stronger US dollar makes it more expensive for everyone else. When gold falls, the TSX feels it more than most markets, because so much of the index is miners.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<p>The November inflation report lands on 10 December, the day after the Fed decides. So the Fed will move without it, and the market will find out within 24 hours whether it guessed right. Until then, we'd expect rate-sensitive sectors and gold miners to stay jumpy.</p>`,
-    ],
-    sources: [
-      { label: "Stock Analysis: US consumer prices rise 0.4% in October (10 Nov 2026)", url: "https://stockanalysis.com/news/us-cpi-rises-october-2026/" },
-      { label: "BNN Bloomberg / The Canadian Press: S&P/TSX composite down nearly 300 points (10 Nov 2026)", url: "https://www.bnnbloomberg.ca/markets/2026/11/10/sptsx-composite-down-nearly-300-points-us-stock-markets-also-lower/" },
-    ],
-  },
-  {
-    slug: "rheinmetall-cuts-2026-sales-forecast-again",
-    title: "Rheinmetall cuts its 2026 sales forecast for the second time",
-    preview: "Germany's largest defence company has record orders and slower deliveries. Investors punished the gap.",
-    tag: "stocks",
-    date: "2026-11-06T12:00:00Z",
-    blocks: [
-      `<p>Rheinmetall has been one of Europe's best-performing stocks since Russia invaded Ukraine. On Thursday it reminded investors that a full order book and a full delivery schedule are not the same thing.</p>`,
-      `<h2>What happened</h2>`,
-      `<p>The Düsseldorf defence group cut its 2026 sales forecast to around €13.2 billion, from a range of €13.7 to 14.2 billion, and trimmed its expected operating margin to about 18.5% from 19%. It blamed delays to Germany's Boxer armoured vehicle programme, now expected next year, and setbacks in acceptance testing for artillery ammunition. It was the second cut this year. The first, in August, followed Berlin's decision to drop a warship order that would have been Rheinmetall's largest since the Second World War.</p>`,
-      `<p>The shares fell about 17%, according to Forbes Italia, and dragged the DAX down 0.4% on the day.</p>`,
-      `<h2>Why it's not as bad as it sounds</h2>`,
-      `<p>The quarter itself was strong. Sales rose 32% to €3.15 billion and operating profit jumped 62% to €553 million. The order backlog reached €78 billion at the end of September. Demand isn't the problem. The problem is that governments buy slowly, test thoroughly, and pay on delivery.</p>`,
-      `<div class="callout"><strong>The number:</strong> €78 billion. Rheinmetall's order backlog, nearly six years of sales at the new forecast. The question investors are now asking is not whether that money arrives, but when.</div>`,
-      `<h2>Why it matters</h2>`,
-      `<p>European defence has been a crowded trade. When a stock is priced for everything to go right, a delay is enough to knock a sixth off its value in a day. The same risk applies to suppliers across the sector, including smaller German and European names that depend on the same government programmes.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<p>Whether the Boxer programme gets signed off early next year, ammunition acceptance results, and whether other European defence companies start warning about the same procurement bottlenecks.</p>`,
-    ],
-    sources: [
-      { label: "Hargreaves Lansdown: Rheinmetall shares tank after second guidance cut (5 Nov 2026)", url: "https://www.hl.co.uk/shares/stock-market-news/company--news/rheinmetall-shares-tank-after-second-guidance-cut-as-defence-contract-delays-bite" },
-      { label: "Forbes Italia: Rheinmetall falls 17% after second cut to forecasts (5 Nov 2026)", url: "https://forbes.it/2026/11/05/rheinmetall-crolla-del-17-dopo-il-secondo-taglio-delle-stime-giu-anche-leonardo" },
-      { label: "MarketScreener: German DAX falls; Rheinmetall tumbles on FY26 outlook downgrade (5 Nov 2026)", url: "https://www.marketscreener.com/news/german-dax-falls-rheinmetall-tumbles-on-fy26-outlook-downgrade-ce785fddd98bf321" },
-    ],
-  },
-  {
-    slug: "fund-manager-commodity-cycle-just-getting-started",
-    title: "A Singapore fund manager's case that the commodity cycle is only starting",
-    preview: "Ki-Un Park of Straits Invest is sitting mostly in cash and waiting. His reasoning on gold, critical minerals and mining stocks is worth hearing, even if you disagree.",
-    tag: "weekly",
-    date: "2026-10-16T12:00:00Z",
-    blocks: [
-      `<p>Most fund managers who say a commodity boom is just beginning are fully invested and hoping you'll agree. Ki-Un Park is unusual. His new fund holds roughly 70% cash, and he says that is exactly because he thinks the best part of the cycle is still ahead.</p>`,
-      `<h2>Who he is</h2>`,
-      `<p>Park leads Straits Invest, a Singapore firm founded in 2003 that manages money for wealthy families and institutions under a licence from the Monetary Authority of Singapore. In July it launched the Straits Invest Elementum Fund. In an interview with Streetwise Reports, Park said the fund had about 6.8 million in assets and was aiming for around 10 million by year end, mostly from existing clients, friends and family while it builds a track record.</p>`,
-      `<h2>How the fund is built</h2>`,
-      `<ul><li>Up to 80% can go into commodities and related investments: ETFs, listed miners and some unlisted companies, from precious and industrial metals to soft commodities.</li><li>The rest can go elsewhere, with cybersecurity and AI named as examples.</li><li>Gold and silver are the foundation, held through physically backed ETFs rather than futures. Park says he and his clients sleep better knowing there is metal behind them, without the cost of storing bars.</li><li>About eight to ten positions so far, with most of the money still waiting.</li></ul>`,
-      `<p>We liked his definition of risk. He doesn't think of it as prices moving around. He thinks of it as the chance of losing everything. That is a useful way to size a position in anything speculative.</p>`,
-      `<h2>His argument</h2>`,
-      `<p>Park thinks critical minerals beyond the usual metals will become a bigger part of commodity portfolios. He uses antimony as the example: production is concentrated in very few countries, China's export restrictions have exposed how fragile supply is, and rebuilding capacity elsewhere takes years. That, he argues, makes for a long cycle rather than a quick spike.</p>`,
-      `<p>On mining stocks, his point is about margins. If metal prices stay high and costs stay steady, established producers generate more free cash, which can pay down debt, fund growth or come back to shareholders. He thinks miners can do well even if metal prices stop rising, because the market hasn't fully priced in what today's prices already mean for their profits.</p>`,
-      `<h2>The small speculative bet</h2>`,
-      `<p>Park disclosed a small, early position in Krait Critical Minerals (CSE: KRIT), a Canadian explorer with antimony interests in Washington State and a gold project in Ontario. He called it a call option: a small amount that could be lost entirely, held for the chance of a large gain. He said a longtime friend introduced the company, he decided within a day or two, access to the CEO mattered, and the fund would probably take part in Krait's next financing.</p>`,
-      `<h2>Where we'd push back</h2>`,
-      `<p>A fund this new and this small has no track record yet, and sitting in 70% cash is easy to describe and hard to time. Personal relationships with company founders can help solve problems faster, as Park says, but they can also make it harder to walk away. And mining shares lag metal prices for real reasons, including rising costs and the habit of issuing new shares when prices are good. The thesis may be right. The proof will be in how and when that cash gets spent.</p>`,
-    ],
-    sources: [
-      { label: "Streetwise Reports: Why this fund manager says the commodity cycle is just getting started (Oct 2026)", url: "https://www.streetwisereports.com/article/2026/10/08/why-this-fund-manager-says-the-commodity-cycle-is-just-getting-started.html" },
-    ],
-  },
-  {
-    slug: "bales-antimony-1950s-stockpile-krait-critical-minerals",
-    title: "A 1950s antimony mine, a new Pentagon program and a small Canadian explorer",
-    preview: "Krait Critical Minerals has a contractual interest in the Bales antimony project in Washington State, which was mined during the last US stockpiling push. Here's what is known and what isn't.",
-    tag: "mining",
-    date: "2026-10-02T12:00:00Z",
-    blocks: [
-      `<p>On 30 September the Pentagon, which now also calls itself the Department of War, formally set up a program called FORTRESS America. Its aim is to keep US forces running if the country's power grid and factories are disrupted, and part of the plan is holding reserves of critical minerals, fuel and munitions on US soil.</p>`,
-      `<p>Washington has done this before. In the early 1950s it paid to find and stockpile domestic antimony, a metal used in ammunition, flame retardants and batteries. One small source back then was a property in Okanogan County, Washington, called Bales.</p>`,
-      `<h2>What Bales is</h2>`,
-      `<p>Bales was discovered in 1947 and produced roughly 100 tons of ore in 1951 and 1952, according to historical records cited by Junior Mining Pro. That year a Washington state geologist reviewed 37 antimony occurrences across the state. Five were judged worth a second look, and three, including Bales, were seen as having some chance of supporting a commercial operation.</p>`,
-      `<p>Historical samples reported about 10.9% antimony at the discovery post and 14.4% in 37.82 tons of hand-sorted material, with arsenic around 0.2%.</p>`,
-      `<p>Two cautions. These figures are historical. They are not a current resource under Canada's NI 43-101 disclosure rules, and the company says so itself. And hand-sorted ore is, by definition, the best rock someone could pick out by hand.</p>`,
-      `<h2>Where Krait comes in</h2>`,
-      `<p>Krait Critical Minerals (CSE: KRIT, FSE: U0S) acquired Nevada Hills Antimony LLC in September. That gave it contractual interests in Bales and in a second project, Antimony Bell. It is worth being precise here: a contractual interest is not outright ownership, and the terms matter.</p>`,
-      `<p>Six days after closing, Krait hired Rangefront Mining Services of Elko, Nevada. The plan is about a week in the field with two geologists, roughly 100 samples, mapping of the old workings and dumps, and a set of drill targets at the end of it.</p>`,
-      `<p>According to Junior Mining Pro, Krait had about 16.1 million shares on issue after the first part of a C$0.75 financing, no warrants, and a market value below C$20 million. Chief executive Oscar Mendoza said in an interview in mid-September that he had spoken with a potential buyer for future production. No agreement has been announced.</p>`,
-      `<h2>Why the arsenic number matters</h2>`,
-      `<p>Antimony ore with a lot of arsenic needs extra processing before a smelter will take it. If Bales material proved clean enough to ship with little treatment, the route to revenue would be shorter and simpler. That is a genuine if. Nothing has been drilled yet, and a week of sampling is the start of finding out, not the answer.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<p>The fieldwork results and the drill targets that come out of them, how the new Pentagon program is funded once its program office is set up, and whether Krait firms up its interest in Bales. Early-stage exploration companies are high risk, and most projects never become mines.</p>`,
-    ],
-    sources: [
-      { label: "Junior Mining Pro: JMP Antimony stock holds asset that 1951 'FORTRESS' program mined for emergency supply (1 Oct 2026)", url: "https://juniorminingpro.substack.com/p/jmp-antimony-stock-holds-asset-that" },
-      { label: "Investing News Network: New FORTRESS America program elevates defense supply chain resilience (1 Oct 2026)", url: "https://investingnews.com/new-fortress-america-program-elevates-defense-supply-chain-resilience/" },
-    ],
-  },
-  {
-    slug: "united-states-antimony-benchmark-what-to-look-for-in-antimony-juniors",
-    title: "What United States Antimony's run tells us about antimony juniors",
-    preview: "The only integrated antimony producer outside China and Russia has become the sector's benchmark. Here's what we look for in the companies trying to follow it.",
-    tag: "mining",
-    date: "2026-09-18T12:00:00Z",
-    blocks: [
-      `<p>Finding a good antimony junior is harder than it sounds. Most of the names we come across have been around for years, have issued new shares many times over, or have already had their discovery moment and the price spike that went with it. So when we want a yardstick for the sector, we keep coming back to one company.</p>`,
-      `<h2>The benchmark</h2>`,
-      `<p>United States Antimony (NYSE: UAMY) describes itself as the only fully integrated antimony company outside China and Russia, and it runs the only antimony smelter in the US, in Montana. The Dallas Business Journal recently ranked it the second fastest-growing company in the Dallas-Fort Worth area, with revenue up 352% over three years. Its market value was around US$680 million at the time of writing.</p>`,
-      `<p>A lot of that story is Washington. The company holds a sole-source Defense Logistics Agency contract worth up to US$245 million to supply the national stockpile, and it has federal support to expand its smelting capacity, according to company announcements.</p>`,
-      `<h2>Why antimony matters now</h2>`,
-      `<p>Antimony is one of those metals most people never think about. It goes into flame retardants, lead-acid batteries and military uses including ammunition. China dominates supply and has restricted exports, which is why Washington treats it as a security issue rather than just another commodity.</p>`,
-      `<h2>What we look for in the juniors</h2>`,
-      `<p>A producer like UAMY sits at one end of the curve. At the other end are newly listed explorers with a project and not much else. When we look at those, these are the questions we ask first:</p>`,
-      `<ul><li><strong>Share structure.</strong> How many shares are on issue, how many warrants are waiting to be exercised, and who holds the stock.</li><li><strong>Grade and history.</strong> Old production records and historical samples count as history, not a resource, until modern drilling confirms them.</li><li><strong>Distance to processing.</strong> An antimony deposit within trucking distance of a smelter is worth far more than one that isn't.</li><li><strong>Who is paying for the work.</strong> The terms of the last financing tell you a lot about how the market sees the company.</li><li><strong>Disclosure.</strong> Whether management tells you clearly what it owns, what it has found and what it hasn't.</li></ul>`,
-      `<p>None of this guarantees anything. Early-stage explorers fail far more often than they succeed, and a strong theme like antimony attracts plenty of weak companies alongside the good ones. But it is a useful filter, and it helps separate a real project from a good story.</p>`,
-      `<h2>What we're watching</h2>`,
-      `<p>The pace of UAMY's deliveries to the stockpile, antimony prices as China adjusts its export policy, and whether new US projects can be financed and permitted fast enough to matter.</p>`,
-    ],
-    sources: [
-      { label: "Junior Mining Pro: The antimony trade produced a 352% grower (17 Sep 2026)", url: "https://juniorminingpro.substack.com/p/the-antimony-trade-produced-a-352" },
-    ],
-  },
-];
-
 export const POST_LABEL: Record<Post["tag"], string> = { weekly: "The Weekly Beacon", stocks: "Stocks", mining: "Mining and Minerals", tech: "Technology" };
-export const postBySlug = (slug: string) => POSTS.find((p) => p.slug === slug);
+
+const POSTS_DIR = path.join(process.cwd(), "content", "posts");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
+const isProd = process.env.NODE_ENV === "production";
+
+/** Markdown to article blocks. A quote (`> ...`) becomes the highlighted "The number" box. */
+const md = new Marked({
+  gfm: true,
+  renderer: {
+    blockquote({ tokens }: Tokens.Blockquote) {
+      const inner = this.parser.parse(tokens).trim();
+      const single = /^<p>([\s\S]*)<\/p>$/.exec(inner);
+      return `<div class="callout">${single && !single[1].includes("<p>") ? single[1] : inner}</div>`;
+    },
+  },
+});
+
+function toBlocks(body: string): string[] {
+  const tokens = md.lexer(body);
+  return tokens
+    .filter((t) => t.type !== "space")
+    .map((t) => md.parser(Object.assign([t], { links: tokens.links })).trim())
+    .filter(Boolean);
+}
+
+const str = (v: unknown) => (typeof v === "string" ? v.trim() : v == null ? "" : String(v).trim());
+const slugify = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9\s-]/g, "").trim().replace(/[\s-]+/g, "-");
+const TAGS = Object.keys(POST_LABEL) as Post["tag"][];
+
+function readImage(photo: Record<string, unknown> | undefined, file: string): PostImage | undefined {
+  const src = str(photo?.image);
+  if (!src) return undefined;
+  try {
+    const { width, height } = imageSize(fs.readFileSync(path.join(PUBLIC_DIR, decodeURI(src))));
+    if (!width || !height) throw new Error("no size");
+    return { src, width, height, alt: str(photo?.alt), caption: str(photo?.caption), credit: str(photo?.credit), creditUrl: str(photo?.credit_url), license: str(photo?.license), licenseUrl: str(photo?.license_url) };
+  } catch {
+    console.warn(`[posts] ${file}: photo ${src} not found in public/, showing the post without it`);
+    return undefined;
+  }
+}
+
+function readPost(file: string): Post | null {
+  try {
+    const { data, content } = matter(fs.readFileSync(path.join(POSTS_DIR, file), "utf8"));
+    const title = str(data.title);
+    const date = data.date instanceof Date ? data.date : new Date(str(data.date));
+    if (!title || Number.isNaN(date.getTime())) throw new Error("needs a title and a date");
+    const tag = TAGS.includes(data.desk) ? (data.desk as Post["tag"]) : "weekly";
+    const sources = (Array.isArray(data.sources) ? data.sources : [])
+      .map((s: Record<string, unknown>) => ({ label: str(s?.label) || str(s?.url), url: str(s?.url) }))
+      .filter((s: { url: string }) => s.url);
+    return {
+      slug: slugify(str(data.slug) || title),
+      title,
+      preview: str(data.preview),
+      tag,
+      date: date.toISOString(),
+      draft: data.draft === true,
+      disclosure: str(data.disclosure) || undefined,
+      image: readImage(data.photo, file),
+      blocks: toBlocks(content),
+      sources,
+    };
+  } catch (e) {
+    console.error(`[posts] skipped ${file}: ${(e as Error).message}`);
+    return null;
+  }
+}
+
+let cache: Post[] | null = null;
+
+/** Every post file, newest first, drafts and future posts included. */
+function loadAll(): Post[] {
+  if (cache && isProd) return cache;
+  const files = fs.existsSync(POSTS_DIR) ? fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".md")) : [];
+  const seen = new Set<string>();
+  const posts = files.map(readPost).filter((p): p is Post => {
+    if (!p) return false;
+    if (seen.has(p.slug)) { console.error(`[posts] two posts share the slug "${p.slug}"; only the first is used`); return false; }
+    seen.add(p.slug);
+    return true;
+  });
+  posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+  cache = posts;
+  return posts;
+}
+
+/** Not published yet: a draft, or dated in the future. */
+export const isUnpublished = (p: Post, now = Date.now()) => p.draft || Date.parse(p.date) > now;
+
+/** Posts the public can see. In production drafts and future-dated posts are hidden; `next dev` shows them all. */
+export function allPosts(): Post[] {
+  const now = Date.now();
+  return loadAll().filter((p) => !isProd || !isUnpublished(p, now));
+}
+
+export const postBySlug = (slug: string) => allPosts().find((p) => p.slug === slug);

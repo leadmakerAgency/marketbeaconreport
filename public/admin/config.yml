@@ -1,0 +1,92 @@
+# Sveltia CMS settings for Market Beacon Report. Open the editor at /admin.
+# Saving a post commits it to GitHub (main), and Vercel puts it live a minute or two later.
+
+backend:
+  name: github
+  repo: leadmakerAgency/marketbeaconreport
+  branch: main
+
+site_url: https://marketbeaconreport.com
+display_url: https://marketbeaconreport.com
+
+media_folder: public/images/posts
+public_folder: /images/posts
+
+collections:
+  - name: posts
+    label: Posts
+    label_singular: Post
+    description: >-
+      Website posts at /briefings/<slug>. The two signup boxes are added by the site
+      (one past the middle of the post, one at the end), so you don't need to add them.
+    folder: content/posts
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    identifier_field: title
+    summary: "{{title}}"
+    sortable_fields: [date, title, desk]
+    preview_path: "briefings/{{fields.slug}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - label: Slug
+        name: slug
+        widget: string
+        required: false
+        hint: "The web address: /briefings/<slug>. Lowercase words with dashes. Leave blank to make one from the title. Don't change it after the post is live, or old links break."
+      - label: Date and time
+        name: date
+        widget: datetime
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+        hint: "A post dated in the future stays hidden until that time (it can take up to an hour to show)."
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+        hint: "Drafts are saved to GitHub but never shown on the site."
+      - label: Desk
+        name: desk
+        widget: select
+        default: weekly
+        options:
+          - { label: The Weekly Beacon, value: weekly }
+          - { label: Stocks, value: stocks }
+          - { label: Mining and Minerals, value: mining }
+          - { label: Technology, value: tech }
+      - label: Preview text
+        name: preview
+        widget: text
+        hint: "One or two sentences. Shown under the title, in the archive and in search results."
+      - label: Disclosure
+        name: disclosure
+        widget: text
+        required: false
+        hint: "Optional. Shown in a box above the article, for example when the post is sponsored or we hold a position."
+      - label: Photo
+        name: photo
+        widget: object
+        required: true
+        collapsed: false
+        fields:
+          - { label: Image, name: image, widget: image, required: true, hint: "Required. Wide photo, at least 1600 px across. It is shown cropped to 16:9." }
+          - { label: Alt text, name: alt, widget: string, required: true, hint: "Required. Describe the photo for people who can't see it." }
+          - { label: Caption, name: caption, widget: string, required: false }
+          - { label: Credit, name: credit, widget: string, required: false, hint: "Photographer or owner." }
+          - { label: Credit link, name: credit_url, widget: string, required: false }
+          - { label: Licence, name: license, widget: string, required: false, hint: "For example CC BY-SA 4.0." }
+          - { label: Licence link, name: license_url, widget: string, required: false }
+      - label: Body
+        name: body
+        widget: markdown
+        hint: "Use Heading 2 for section titles. A quote block becomes the yellow highlighted box, for example: **The number:** US$141 billion. ..."
+      - label: Sources
+        name: sources
+        widget: list
+        required: false
+        label_singular: Source
+        summary: "{{fields.label}}"
+        fields:
+          - { label: Label, name: label, widget: string, hint: "Publication: headline (date)" }
+          - { label: Link, name: url, widget: string }

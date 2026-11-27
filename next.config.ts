@@ -12,10 +12,16 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   outputFileTracingIncludes: {
-    "/**/*": ["./src/assets/fonts/**/*"],
+    "/**/*": ["./src/assets/fonts/**/*", "./content/posts/**/*"],
+    // Post pages read each photo's size from the file.
+    "/briefings/**/*": ["./public/images/posts/**/*"],
   },
   async redirects() {
-    return [{ source: "/issues/:id", destination: "/briefings/:id", permanent: true }];
+    return [
+      { source: "/issues/:id", destination: "/briefings/:id", permanent: true },
+      // Sveltia CMS lives in public/admin/.
+      { source: "/admin", destination: "/admin/index.html", permanent: false },
+    ];
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

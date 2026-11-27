@@ -1,0 +1,749 @@
+{
+  "name": "Market Beacon Report autoblog",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -528
+      ],
+      "id": "c8e35754-db8b-46e7-888e-61615d6c4e02",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Used",
+              "lookupValue": "No"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        -528
+      ],
+      "id": "d762b5b4-700c-4fdd-bab7-a6622466b7ac",
+      "name": "Get Keyword",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8CGBmJJQ5Xzf0DxE",
+          "name": "Lead Agency Spreadsheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Keyword": "={{ $json.Keyword }}",
+            "Used": "Yes"
+          },
+          "matchingColumns": [
+            "Keyword"
+          ],
+          "schema": [
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Desk",
+              "displayName": "Desk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Used",
+              "displayName": "Used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -528
+      ],
+      "id": "6a3e1b43-09fa-4600-92ef-e7fb04eef538",
+      "name": "Mark keyword as Used",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8CGBmJJQ5Xzf0DxE",
+          "name": "Lead Agency Spreadsheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Desk: {{ $('Get Keyword').item.json.Desk || 'The Weekly Beacon' }}\nKeyword/topic: {{ $json.Keyword }}\n\nWrite the headline.",
+        "options": {
+          "systemMessage": "You are the headline editor of Market Beacon Report, a free email and web publication with short, plain-English briefings on stocks, mining and minerals, and technology across the United States, Canada and Germany. Readers are self-directed investors who make their own decisions.\n\nWrite one headline for an article about the keyword/topic the user gives you.\n\nRules:\n- Sentence case (capitalise only the first word and proper nouns).\n- 45 to 75 characters.\n- Put the main keyword or its natural wording near the beginning.\n- Calm, specific and factual. It should read like a business news headline, not a marketing line.\n- No clickbait, no hype words (soaring, skyrocketing, explosive, shocking, must-buy, insane).\n- No price predictions, no promises of returns, no \"best stocks to buy\".\n- No quotation marks, no emojis, no colon-heavy SEO formats, no all caps.\n- Never use the em dash character (—).\n- Return only the headline and nothing else."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        400,
+        -528
+      ],
+      "id": "c8908c80-fd5d-45c0-9eaa-988b8e5d6803",
+      "name": "Create Title",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        -288
+      ],
+      "id": "b58bada9-c141-4535-9bdf-401f8c092eaf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "TuUAbXRBeFVhVWxO",
+          "name": "Mark OpenAI Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const title = String($input.first().json.output || '').trim();\n\nconst slug = title\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^a-z0-9\\s-]/g, '')\n  .trim()\n  .replace(/[\\s-]+/g, '-')\n  .slice(0, 80)\n  .replace(/-+$/g, '');\n\nreturn { json: { ...$json, slug } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        -528
+      ],
+      "id": "83f9b955-a47c-4f69-b736-a66128df80aa",
+      "name": "Create slug"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Keyword": "={{ $('Get Keyword').item.json.Keyword }}",
+            "Title": "={{ $('Create Title').item.json.output }}"
+          },
+          "matchingColumns": [
+            "Keyword"
+          ],
+          "schema": [
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Desk",
+              "displayName": "Desk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Used",
+              "displayName": "Used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        -528
+      ],
+      "id": "f9a29a0c-387a-41e5-bc80-ed280ca09d45",
+      "name": "Save Title",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8CGBmJJQ5Xzf0DxE",
+          "name": "Lead Agency Spreadsheet"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Headline: {{ $('Create Title').item.json.output }}\nKeyword: {{ $('Get Keyword').item.json.Keyword }}\nDesk: {{ $('Get Keyword').item.json.Desk || 'The Weekly Beacon' }}\n\nWrite the full article now.",
+        "options": {
+          "systemMessage": "You are a senior writer at Market Beacon Report. The publication sends short, plain-English briefings on stocks, mining and minerals, and technology to self-directed investors in the United States, Canada and Germany. Its promise: less hype, more insight. No stock tips, no pressure to invest, just information worth the reader's time.\n\nYou write one complete article from a headline, a keyword and a desk. You have no access to live data or news, so you write evergreen explainers and analysis, not breaking news.\n\nACCURACY RULES (most important)\n- Do not invent facts. Never make up prices, percentages, company results, dates, deals, quotes, people, reports or statistics.\n- Only use figures and facts that are long-established and widely known (for example, what a metal is used for, how an index or a royalty works). If you are not certain, describe it in general terms instead.\n- Do not quote anyone. Do not attribute claims to named analysts, firms or publications.\n- Do not describe recent events as if you know they happened. Avoid \"this week\", \"yesterday\", \"recently announced\".\n- Never give personal financial advice. Do not tell readers to buy, sell or hold anything, and do not predict prices. You can explain what investors usually watch, the risks, and the questions worth asking.\n\nHOUSE STYLE\n- Plain English, short paragraphs (2 to 4 sentences), active voice, confident and calm.\n- British spelling (centre, programme, licence, analyse). Write money as US$, C$ or € before the number.\n- Explain any jargon the first time it appears, in a few words.\n- Specific and concrete. Use real-world examples of how things work, not vague generalities.\n- Use bold only for the lead-in words of list items.\n\nSTRUCTURE (markdown)\n- No H1 title.\n- Open with one or two short paragraphs that say plainly what the article is about and why it matters to an investor. No throat-clearing.\n- Then 4 to 6 sections, each starting with a \"## \" heading written as a short plain phrase (for example: ## Why it matters, ## How the economics work, ## The risks). Each section has at least two paragraphs or one paragraph and a short list.\n- Use at most two bullet lists in the whole article, each 3 to 5 items, each item starting with a short bold lead-in followed by a full sentence.\n- Somewhere in the middle of the article, include exactly one highlighted takeaway as a single markdown quote line in this exact form:\n  > **The takeaway:** one or two sentences that sum up the key point.\n- The last section must be \"## What we're watching\", with 3 to 4 bullet points on the signals, data releases or developments investors can follow on this topic (described generally, without inventing dates).\n- Do not add a conclusion section, a disclaimer, a sources list, FAQs, tables, images or links. The website adds the disclaimer and the sign-up boxes itself.\n\nLENGTH\n- 700 to 1,100 words.\n\nBANNED\n- The em dash character (—). Use commas, full stops or brackets instead.\n- Phrases: in today's world, in today's fast-paced, game-changer, delve, dive in, unlock, landscape, navigate the, it's important to note, in conclusion, buckle up, to the moon, not financial advice.\n\nBefore answering, check silently: no invented numbers, names, quotes or events; no advice to buy or sell; one \"> **The takeaway:**\" line; last section is \"## What we're watching\"; no em dashes; no H1.\n\nReturn only the article in markdown."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1184,
+        -528
+      ],
+      "id": "b10fbd77-e4f9-47b7-b82c-10c20f4bef7a",
+      "name": "Create the Article",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        -304
+      ],
+      "id": "45782b15-b691-433a-9745-cf96b5b2dd28",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "TuUAbXRBeFVhVWxO",
+          "name": "Mark OpenAI Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preview text (the dek under the headline): the article's opening, cut at a sentence end.\nconst body = String($json.output || '').trim();\nconst firstPara = body.split(/\\n\\s*\\n/).map((p) => p.trim()).find((p) => p && !/^[#>\\-*]/.test(p)) || '';\nconst plain = firstPara.replace(/\\*\\*|__|\\*|_|`/g, '').replace(/\\[([^\\]]+)\\]\\([^)]*\\)/g, '$1').replace(/\\s+/g, ' ').trim();\nconst sentences = plain.match(/[^.!?]+[.!?]+/g) || [plain];\nlet preview = '';\nfor (const s of sentences) {\n  if ((preview + s).length > 220 && preview) break;\n  preview += s;\n}\npreview = preview.replace(/\\s*—\\s*/g, ', ').trim();\nif (preview.length > 240) preview = preview.slice(0, 237).replace(/\\s+\\S*$/, '') + '...';\n\nreturn { json: { ...$json, preview } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -528
+      ],
+      "id": "88e6fdb0-612a-4ae6-a954-878858a035d5",
+      "name": "Create preview"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Article headline: {{ $('Create Title').item.json.output }}\nDesk: {{ $('Get Keyword').item.json.Desk || 'The Weekly Beacon' }}\n\nWrite the image prompt.",
+        "options": {
+          "systemMessage": "You are the photo editor of Market Beacon Report, a business publication about stocks, mining and minerals, and technology.\n\nFrom an article headline, write one image generation prompt for the article's lead photo.\n\nThe photo must:\n- Show the real, literal subject of the article in an editorial news-photography style, like a picture in a serious financial newspaper. Examples: an open-pit mine or ore samples for a mining story, a semiconductor wafer or data centre aisle for a chip story, a port with containers for a trade story, a stock exchange building exterior or trading screens with abstract charts for a markets story.\n- Be photorealistic, sharp and natural, with soft directional daylight and a calm, sober colour palette (deep blues, greys, earth tones).\n- Have a clean composition with one clear focal point, wide horizontal 16:9 framing.\n\nThe photo must not:\n- Contain any text, words, letters, numbers, tickers, logos, brand names or flags with text.\n- Show identifiable real people, celebrities, executives or politicians, or any real company's branding or products.\n- Use metaphors or clichés: no bulls and bears, no rockets, no piles of cash or coins, no handshakes, no floating holograms, no glowing arrows.\n\nReturn only the prompt, as one detailed paragraph in English, with no explanation. Always end it with exactly:\nNo text, no words, no letters, no numbers, no logos, no watermarks, photorealistic editorial photograph, high resolution, 16:9."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1760,
+        -528
+      ],
+      "id": "866df691-659f-4ff6-8ef4-f1259c7c0d6d",
+      "name": "Create Prompt for Image",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1760,
+        -304
+      ],
+      "id": "3f174a7c-96d7-437e-830e-eae509821f3c",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "TuUAbXRBeFVhVWxO",
+          "name": "Mark OpenAI Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-image-2', prompt: $json.output + \"\\n\\nGenerate this image now. Follow the description exactly. Wide horizontal format, photorealistic editorial photograph, high resolution, absolutely no text, words, letters, numbers or logos.\", size: '1536x1024', output_format: 'jpeg', output_compression: 85, n: 1 }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2112,
+        -528
+      ],
+      "id": "3a77698e-5dd4-44c7-a555-2a7731693186",
+      "name": "Generate an image",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "openAiApi": {
+          "id": "TuUAbXRBeFVhVWxO",
+          "name": "Mark OpenAI Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {
+          "fileName": "image.jpg",
+          "mimeType": "image/jpeg"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2352,
+        -528
+      ],
+      "id": "86b10dc1-a11d-440c-9651-330654f112a3",
+      "name": "Image to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const slug = $('Create slug').first().json.slug;\nconst imagePath = 'public/images/posts/' + slug + '-' + $execution.id + '.jpg';\nreturn $input.all().map((item) => ({ json: { ...item.json, imagePath }, binary: item.binary }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        -528
+      ],
+      "id": "a7016f3c-59b6-43b7-a376-afcd05c10e8d",
+      "name": "Create image path"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "leadmakerAgency",
+          "mode": "list",
+          "cachedResultName": "leadmakerAgency",
+          "cachedResultUrl": "https://github.com/leadmakerAgency"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "marketbeaconreport",
+          "mode": "list",
+          "cachedResultName": "marketbeaconreport",
+          "cachedResultUrl": "https://github.com/leadmakerAgency/marketbeaconreport"
+        },
+        "filePath": "={{ $json.imagePath }}",
+        "binaryData": true,
+        "commitMessage": "=Image for: {{ $('Create Title').item.json.output }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        2576,
+        -528
+      ],
+      "id": "c7f1d3d8-3395-46ff-bc86-cbe6a3167313",
+      "name": "Upload image",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "githubApi": {
+          "id": "oPh1BILDv4rasQFO",
+          "name": "leadmakerAgency github"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Builds the post file in the format Sveltia CMS and the site read (content/posts/*.md).\nconst DRAFT = false; // true = save as a draft to review in /admin before it goes live\n\nconst title = String($('Create Title').first().json.output || '').replace(/[\\r\\n]+/g, ' ').replace(/^[\"']|[\"']$/g, '').trim();\nconst slug = $('Create slug').first().json.slug;\nconst preview = $('Create preview').first().json.preview || '';\nconst keyword = $('Get Keyword').first().json.Keyword || '';\nconst deskRaw = String($('Get Keyword').first().json.Desk || '').toLowerCase();\nconst imagePath = $('Create image path').first().json.imagePath;\n\n// Desk column can say \"Stocks\", \"mining\", \"Mining and Minerals\", \"Technology\", \"tech\", \"Weekly\"...\nconst desk = /stock/.test(deskRaw) ? 'stocks' : /min/.test(deskRaw) ? 'mining' : /tech/.test(deskRaw) ? 'tech' : 'weekly';\n\nlet body = String($('Create the Article').first().json.output || '').trim();\nbody = body\n  .replace(/^\\s*#\\s+.*\\n+/, '')                // drop an H1 if the model added one\n  .replace(/\\n#{1,2}\\s*(sources|references|disclaimer)\\b[\\s\\S]*$/i, '') // no sources/disclaimer sections\n  .replace(/\\s*—\\s*/g, ', ')                    // no em dashes\n  .trim();\n\nconst q = (v) => JSON.stringify(String(v || '').replace(/[\\r\\n]+/g, ' ').trim());\nconst now = new Date();\nconst date = now.toISOString().replace(/\\.\\d{3}Z$/, 'Z');\nconst day = date.slice(0, 10);\n\nconst markdown = [\n  '---',\n  'title: ' + q(title),\n  'slug: ' + slug,\n  'date: ' + date,\n  'draft: ' + DRAFT,\n  'desk: ' + desk,\n  'preview: ' + q(preview),\n  'photo:',\n  '  image: /' + imagePath.replace(/^public\\//, ''),\n  '  alt: ' + q('Illustration for the article: ' + title),\n  '  caption: ' + q('AI-generated illustration.'),\n  '---',\n  '',\n  body,\n  '',\n].join('\\n');\n\nreturn [{ json: { slug, title, keyword, desk, postPath: 'content/posts/' + day + '-' + slug + '.md', markdown } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        -528
+      ],
+      "id": "8d9c519c-94a3-419b-a693-0340d6752201",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "leadmakerAgency",
+          "mode": "list",
+          "cachedResultName": "leadmakerAgency",
+          "cachedResultUrl": "https://github.com/leadmakerAgency"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "marketbeaconreport",
+          "mode": "list",
+          "cachedResultName": "marketbeaconreport",
+          "cachedResultUrl": "https://github.com/leadmakerAgency/marketbeaconreport"
+        },
+        "filePath": "={{ $json.postPath }}",
+        "fileContent": "={{ $json.markdown }}",
+        "commitMessage": "=New post: {{ $json.title }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        2944,
+        -528
+      ],
+      "id": "86b3c25e-968a-4bcc-8af1-0ad29b571acb",
+      "name": "Create post file",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "githubApi": {
+          "id": "oPh1BILDv4rasQFO",
+          "name": "leadmakerAgency github"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Keyword": {
+      "main": [
+        [
+          {
+            "node": "Mark keyword as Used",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark keyword as Used": {
+      "main": [
+        [
+          {
+            "node": "Create Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Title": {
+      "main": [
+        [
+          {
+            "node": "Create slug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create slug": {
+      "main": [
+        [
+          {
+            "node": "Save Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Title": {
+      "main": [
+        [
+          {
+            "node": "Create the Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create the Article": {
+      "main": [
+        [
+          {
+            "node": "Create preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create preview": {
+      "main": [
+        [
+          {
+            "node": "Create Prompt for Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Prompt for Image": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Image to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image to File": {
+      "main": [
+        [
+          {
+            "node": "Create image path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create image path": {
+      "main": [
+        [
+          {
+            "node": "Upload image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload image": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Create post file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create Title",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create the Article",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create Prompt for Image",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -23,10 +23,21 @@ export function articleBlocks(emailHtml: string): string[] | null {
   }
 }
 
-/** Where the mid-article signup goes: the first section heading at or after a third of the way in. */
+/**
+ * Where the mid-article signup goes: just before the first section heading that starts past the
+ * halfway point of the text, so it never splits a section. With no heading there, after the block
+ * that holds the halfway point.
+ */
 export function signupIndex(blocks: string[]) {
   if (blocks.length < 4) return blocks.length;
-  const third = Math.ceil(blocks.length / 3);
-  for (let i = third; i < blocks.length; i++) if (/^<h2/i.test(blocks[i])) return i;
-  return third;
+  const lengths = blocks.map((b) => b.replace(/<[^>]*>/g, "").length);
+  const half = lengths.reduce((a, b) => a + b, 0) / 2;
+  let start = 0;
+  let middle = -1;
+  for (let i = 0; i < blocks.length; i++) {
+    if (start >= half && /^<h2/i.test(blocks[i])) return i;
+    start += lengths[i];
+    if (middle < 0 && start >= half) middle = i + 1;
+  }
+  return Math.min(middle, blocks.length);
 }

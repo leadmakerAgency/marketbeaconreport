@@ -1,11 +1,11 @@
 import "server-only";
 import { brevo, brevoConfigured, type Campaign } from "./brevo";
 import { ARCHIVE_TAGS } from "./config";
-import { POSTS } from "./posts";
+import { allPosts } from "./posts";
 
-/** Launch posts held in code until the CMS is connected. */
+/** Website posts from the CMS (content/posts). */
 function staticItems(tag?: string): ArchiveItem[] {
-  return POSTS.filter((p) => !tag || p.tag === tag).map((p, i) => ({ id: -(i + 1), title: p.title, preview: p.preview, tag: p.tag, label: ARCHIVE_TAGS[p.tag], date: p.date, href: `/briefings/${p.slug}` }));
+  return allPosts().filter((p) => !tag || p.tag === tag).map((p, i) => ({ id: -(i + 1), title: p.title, preview: p.preview, tag: p.tag, label: ARCHIVE_TAGS[p.tag], date: p.date, href: `/briefings/${p.slug}` }));
 }
 
 const byDate = (a: ArchiveItem, b: ArchiveItem) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0);
