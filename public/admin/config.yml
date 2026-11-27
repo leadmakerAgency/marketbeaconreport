@@ -59,6 +59,17 @@ collections:
         name: preview
         widget: text
         hint: "One or two sentences. Shown under the title, in the archive and in search results."
+      - label: Keywords
+        name: keywords
+        widget: list
+        required: false
+        hint: "Optional. The search phrases this post is written for, e.g. evolution mining share price. Used in search metadata only, not shown on the page."
+      - label: Updated
+        name: updated
+        widget: datetime
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+        required: false
+        hint: "Optional. Set when you make a meaningful update to a post, so search engines see it as fresh."
       - label: Disclosure
         name: disclosure
         widget: text

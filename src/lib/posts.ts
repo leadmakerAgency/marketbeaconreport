@@ -17,7 +17,11 @@ export type Post = {
   preview: string;
   tag: "weekly" | "stocks" | "mining" | "tech";
   date: string; // ISO date
+  /** Last meaningful edit, if set in the front matter (ISO date). */
+  updated?: string;
   draft: boolean;
+  /** Search phrases the post is written for. Used in metadata and structured data only. */
+  keywords: string[];
   disclosure?: string;
   image?: PostImage;
   blocks: string[];
@@ -53,6 +57,11 @@ function toBlocks(body: string): string[] {
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : v == null ? "" : String(v).trim());
 const slugify = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9\s-]/g, "").trim().replace(/[\s-]+/g, "-");
 const TAGS = Object.keys(POST_LABEL) as Post["tag"][];
+const toIso = (v: unknown) => {
+  if (!v) return undefined;
+  const d = v instanceof Date ? v : new Date(str(v));
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+};
 
 function readImage(photo: Record<string, unknown> | undefined, file: string): PostImage | undefined {
   const src = str(photo?.image);
@@ -83,7 +92,9 @@ function readPost(file: string): Post | null {
       preview: str(data.preview),
       tag,
       date: date.toISOString(),
+      updated: toIso(data.updated),
       draft: data.draft === true,
+      keywords: (Array.isArray(data.keywords) ? data.keywords : str(data.keywords).split(",")).map(str).filter(Boolean),
       disclosure: str(data.disclosure) || undefined,
       image: readImage(data.photo, file),
       blocks: toBlocks(content),

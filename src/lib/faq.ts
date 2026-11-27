@@ -16,6 +16,14 @@ export const FAQ: { q: string; a: string }[] = [
     a: "We use double opt-in so nobody can subscribe your address without your permission. Click the link in that email to start receiving briefings.",
   },
   {
+    q: "Do you cover ASX-listed mining companies?",
+    a: "Yes. The Mining and Minerals briefing covers miners listed on the ASX, TSX, TSX Venture and NYSE, from gold producers such as Evolution Mining, Newmont and Kingsgate Consolidated to lithium producers such as SQM and junior explorers. Our company guides on the Mining and Minerals page explain what drives each one.",
+  },
+  {
+    q: "What is the difference between JORC and NI 43-101?",
+    a: "Both set the rules for how mining companies report exploration results, mineral resources and reserves. ASX-listed companies report under Australia's JORC Code, while Canadian-listed companies follow National Instrument 43-101, which uses the CIM Definition Standards from the Canadian Institute of Mining, Metallurgy and Petroleum. The resource and reserve categories are broadly the same.",
+  },
+  {
     q: "How is sponsored content handled?",
     a: "Sponsored blocks are labelled Sponsored, name the advertiser, sit apart from editorial content and carry a disclaimer. Our writers do not write sponsored copy.",
   },

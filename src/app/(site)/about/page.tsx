@@ -23,7 +23,7 @@ export default function About() {
         <div className="wrap">
           <div className="eyebrow">About</div>
           <h1 className="h1">Market briefings for people who make their own decisions.</h1>
-          <p className="lede">Market Beacon Report covers stocks, mining and minerals, and technology across the United States, Canada and Germany. Short, sourced briefings so you can keep up without a terminal.</p>
+          <p className="lede">Market Beacon Report covers stocks, mining and minerals, and technology across the United States, Canada and Germany, with ASX-listed miners on our Mining and Minerals desk. Short, sourced briefings so you can keep up without a terminal.</p>
         </div>
       </section>
       <section className="section">

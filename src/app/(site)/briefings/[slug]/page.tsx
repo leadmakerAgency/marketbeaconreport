@@ -24,7 +24,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const url = `${siteUrl()}/briefings/${post.slug}`;
     const img = post.image;
     const images = img ? [{ url: `${siteUrl()}${img.src}`, width: img.width, height: img.height, alt: img.alt }] : undefined;
-    return { title: post.title, description: post.preview, alternates: { canonical: url }, openGraph: { type: "article", url, title: post.title, description: post.preview, publishedTime: post.date, images }, twitter: { card: "summary_large_image", images: images?.map((i) => i.url) } };
+    const tags = post.keywords.length ? post.keywords : undefined;
+    return { title: post.title, description: post.preview, keywords: tags, alternates: { canonical: url }, openGraph: { type: "article", url, title: post.title, description: post.preview, publishedTime: post.date, modifiedTime: post.updated ?? post.date, section: POST_LABEL[post.tag], tags, images }, twitter: { card: "summary_large_image", images: images?.map((i) => i.url) } };
   }
   const c = await issue(idOf(slug));
   if (!c) return { title: "Briefing not found" };
@@ -81,7 +82,31 @@ const DESK_FOR_POST: Record<Post["tag"], string> = { weekly: "weekly-beacon", st
 
 function StaticPost({ post }: { post: Post }) {
   const url = `${siteUrl()}/briefings/${post.slug}`;
-  const jsonLd = { "@context": "https://schema.org", "@type": "NewsArticle", headline: post.title, description: post.preview, datePublished: post.date, url, image: post.image ? `${siteUrl()}${post.image.src}` : undefined, publisher: { "@type": "Organization", name: "Market Beacon Report", logo: { "@type": "ImageObject", url: `${siteUrl()}/icon.svg` } } };
+  const org = { "@type": "Organization", "@id": `${siteUrl()}/#organization`, name: "Market Beacon Report", url: siteUrl(), logo: { "@type": "ImageObject", url: `${siteUrl()}/icon.svg` } };
+  const deskUrl = `${siteUrl()}/desks/${DESK_FOR_POST[post.tag]}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "NewsArticle",
+        headline: post.title,
+        description: post.preview,
+        datePublished: post.date,
+        dateModified: post.updated ?? post.date,
+        url,
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        image: post.image ? { "@type": "ImageObject", url: `${siteUrl()}${post.image.src}`, width: post.image.width, height: post.image.height, caption: post.image.caption || post.image.alt } : undefined,
+        articleSection: POST_LABEL[post.tag],
+        keywords: post.keywords.length ? post.keywords.join(", ") : undefined,
+        inLanguage: "en",
+        isAccessibleForFree: true,
+        author: org,
+        publisher: org,
+        citation: post.sources.length ? post.sources.map((s) => ({ "@type": "CreativeWork", name: s.label, url: s.url })) : undefined,
+      },
+      { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl() }, { "@type": "ListItem", position: 2, name: POST_LABEL[post.tag], item: deskUrl }, { "@type": "ListItem", position: 3, name: post.title, item: url }] },
+    ],
+  };
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />

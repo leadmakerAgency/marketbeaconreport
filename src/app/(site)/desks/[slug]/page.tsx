@@ -6,13 +6,18 @@ import { sponsorFor } from "@/lib/sponsors";
 import { SubscribeForm } from "@/components/SubscribeForm";
 import { IssueList } from "@/components/IssueList";
 import { SponsorCard } from "@/components/SponsorCard";
+import { postBySlug, POST_LABEL, type Post } from "@/lib/posts";
+import { siteUrl } from "@/lib/site";
 
 export const revalidate = 600;
 export function generateStaticParams() { return DESKS.map((d) => ({ slug: d.slug })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const d = getDesk((await params).slug);
-  return d ? { title: d.name, description: d.description } : {};
+  if (!d) return {};
+  const url = `${siteUrl()}/desks/${d.slug}`;
+  const description = d.seoDescription ?? d.description;
+  return { title: d.seoTitle ?? d.name, description, alternates: { canonical: url }, openGraph: { type: "website", url, title: d.seoTitle ?? d.name, description } };
 }
 
 export default async function DeskPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,8 +25,19 @@ export default async function DeskPage({ params }: { params: Promise<{ slug: str
   if (!desk) notFound();
   const items = (await archive(desk.tag)).slice(0, 9);
   const sponsor = sponsorFor(desk.slug);
+  const guides = (desk.guides ?? []).map((s) => postBySlug(s)).filter((g): g is Post => !!g);
+  const guideItems = guides.map((g, i) => ({ id: -1000 - i, title: g.title, preview: g.preview, tag: g.tag, label: POST_LABEL[g.tag], date: g.date, href: `/briefings/${g.slug}` }));
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "CollectionPage", name: desk.seoTitle ?? desk.name, description: desk.seoDescription ?? desk.description, url: `${siteUrl()}/desks/${desk.slug}`, isPartOf: { "@type": "WebSite", name: "Market Beacon Report", url: siteUrl() } },
+      { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl() }, { "@type": "ListItem", position: 2, name: desk.name, item: `${siteUrl()}/desks/${desk.slug}` }] },
+      ...(guides.length ? [{ "@type": "ItemList", name: `${desk.name} guides`, itemListElement: guides.map((g, i) => ({ "@type": "ListItem", position: i + 1, url: `${siteUrl()}/briefings/${g.slug}`, name: g.title })) }] : []),
+    ],
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="hero">
         <div className="wrap grid">
           <div>
@@ -37,6 +53,14 @@ export default async function DeskPage({ params }: { params: Promise<{ slug: str
           </div>
         </div>
       </section>
+      {guideItems.length > 0 && (
+        <section className="section alt">
+          <div className="wrap">
+            <div className="section-head"><div><div className="eyebrow">Guides</div><h2 className="h2">Company guides and explainers</h2></div><p>Background on the companies and reporting rules that come up most in our {desk.name} briefings.</p></div>
+            <IssueList items={guideItems} />
+          </div>
+        </section>
+      )}
       <section className="section">
         <div className="wrap">
           <div className="section-head"><div><div className="eyebrow">Archive</div><h2 className="h2">Recent {desk.name} briefings</h2></div><a className="btn ghost small" href={`/archive?desk=${desk.tag}`}>All {desk.name} briefings</a></div>

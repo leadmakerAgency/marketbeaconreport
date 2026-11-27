@@ -20,6 +20,12 @@ export type Desk = {
   flagship?: boolean;
   description: string;
   covers: string[];
+  /** Page title for search results, if different from the desk name. */
+  seoTitle?: string;
+  /** Longer search description for the desk page (falls back to description). */
+  seoDescription?: string;
+  /** Slugs of evergreen website posts shown as guides on the desk page. */
+  guides?: string[];
 };
 
 export const DESKS: Desk[] = [
@@ -42,7 +48,17 @@ export const DESKS: Desk[] = [
     name: "Mining and Minerals", short: "Mining", code: "TSX-V / ASX / LME", cadence: "Twice weekly",
     sendTime: "Tuesday and Friday", readTime: "5 min read",
     description: "Commodity prices, drill results, resource updates and critical minerals policy across copper, gold, uranium, lithium and antimony.",
-    covers: ["Gold, copper, uranium and lithium prices", "Drill results and resource upgrades", "Critical minerals policy and offtake deals", "Junior explorer financings"],
+    covers: ["Gold, copper, uranium and lithium prices", "ASX, TSX and NYSE miners, from gold producers to lithium", "Drill results and resource upgrades under JORC and NI 43-101", "Critical minerals policy and offtake deals", "Junior explorer financings"],
+    seoTitle: "Mining and Minerals: ASX, TSX and NYSE mining stocks news",
+    seoDescription: "Free mining news briefing on ASX, TSX and NYSE miners: gold producers such as Evolution Mining, Newmont and Kingsgate, lithium producers such as SQM, commodity prices, drill results and critical minerals policy.",
+    guides: [
+      "asx-mining-companies-australia-guide",
+      "evolution-mining-share-price-asx-evn",
+      "newmont-share-price-what-drives-nem",
+      "kingsgate-share-price-asx-kcn-chatree",
+      "sqm-lithium-chile-mt-holland-explained",
+      "jorc-vs-ni-43-101-cim-definition-standards",
+    ],
   },
   {
     slug: "technology", key: "tech", listId: LISTS.tech, tag: "tech",
